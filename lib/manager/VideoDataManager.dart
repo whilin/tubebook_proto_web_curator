@@ -27,7 +27,7 @@ class VideoDataManager extends DataManager with ChangeNotifier {
 
   final List<VideoDesc> videoList = new List<VideoDesc>();
 
-  Future<List<VideoDesc>> loadVideoList(dynamic where, int page, int pageCount) async {
+  Future<List<VideoDesc>> loadVideoList(dynamic where, dynamic sort, int page, int pageCount) async {
 
     Map<String, dynamic> query = new Map<String, dynamic>();
     query["where"] = where;
@@ -36,7 +36,11 @@ class VideoDataManager extends DataManager with ChangeNotifier {
       'pageCount' : pageCount
     };
 
-    String body = jsonEncode(query);
+    if(sort !=null)  {
+      query['sort'] = sort;
+    }
+
+      String body = jsonEncode(query);
     print("loadVideoList Query:"+body);
 
     var jsonResponse = await super.proxy.request(VideoCollectionName, DbOpName.find, query);

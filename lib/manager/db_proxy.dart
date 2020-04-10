@@ -25,7 +25,7 @@ class DBProxy {
 
   static const String dbName = "MyTubeBook";
   static const String domain =
-      "myadmin:qawsedrf@ec2-13-124-95-20.ap-northeast-2.compute.amazonaws.com:8080";
+      "ec2-13-124-95-20.ap-northeast-2.compute.amazonaws.com:8080";
 
   String getUrl(String collectionName, String opName) {
     return "http://$domain/mongoApi/$dbName/$collectionName/${opName.toString()}";
@@ -54,6 +54,23 @@ class DBProxy {
       print(log);
       throw new Exception("request return error:${response.statusCode}");
     }
+  }
+
+  Future<Map<String, dynamic>> requestNet(String apiName, Map<String, dynamic> reqPacket) async {
+      String url = "http://$domain/$apiName";
+
+      var response = await http.post(url, headers: {HttpHeaders.contentTypeHeader: "application/json"}, body: jsonEncode(reqPacket));
+      // print(response.body);
+      if (response.statusCode == 200) {
+
+         return jsonDecode(response.body);
+
+      } else {
+
+        String log = "request return error:${response.statusCode}";
+        print(log);
+        throw new Exception("request return error:${response.statusCode}");
+      }
   }
 
 }

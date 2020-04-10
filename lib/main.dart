@@ -71,7 +71,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedPage = 0;
+  int _selectedPage = 1;
 
   void setPage(int page) {
     setState(() {
@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ListTile(
                   leading: Icon(Icons.people),
-                  title: Text('Channels'),
+                  title: Text('Creator'),
                   onTap: () {
                     setPage(2);
                   },

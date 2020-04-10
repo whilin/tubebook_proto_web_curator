@@ -3,15 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'models.g.dart';
 
-class KeyValue {
-  String key;
+class KeyName {
+  dynamic key;
   String value;
 
-  KeyValue(this.key, this.value);
+  KeyName(this.key, this.value);
 
 
-  static KeyValue findKeyValue(List<KeyValue> list, String key) {
-    KeyValue e;
+  static KeyName findKeyValue(List<KeyName> list, dynamic key) {
+    KeyName e;
 
     try {
       e = list.firstWhere((element) => element.key == key);
@@ -22,94 +22,40 @@ class KeyValue {
     return e;
   }
 
-  static void initList(List<KeyValue> list) {
+  static void initList(List<KeyName> list) {
     list.clear();
-    list.add(new KeyValue('','none'));
+    list.add(new KeyName('','none'));
   }
 
-  static void initList_append(List<KeyValue> list, List<KeyValue> append) {
+  static void initList_append(List<KeyName> list, List<KeyName> append) {
     list.clear();
-    list.add(new KeyValue('','none'));
+    list.add(new KeyName('','none'));
     list.addAll(append);
   }
 }
 
+List<KeyName> markKeyName = [
+  KeyName(0, '미분류'),
+  KeyName(1, '처리'),
+  KeyName(10, '삭제'),
+];
 
-@JsonSerializable()
-class DBEntity {
-  String _id;
+List<KeyName> LessonLevelKeyNameList = [
+  KeyName(LessonLevel.Beginnger, 'Beginnger'),
+  KeyName(LessonLevel.Intermediate, 'Intermediate'),
+  KeyName(LessonLevel.Advanced, 'Advanced'),
+];
 
-  DBEntity();
+List<KeyName> ChannelTypeKeyNameList = [
+  KeyName(ChannelType.Creator, 'Creator'),
+  KeyName(ChannelType.Curator, '큐레이터'),
+];
 
-  DBEntity.fromJson(Map<String, dynamic> map) : _id = map['_id'];
+List<KeyName> TopicTypeKeyNameList = [
+  KeyName(TopicType.Category, 'Category'),
+  KeyName(TopicType.Curation, 'Curation'),
+];
 
-  String get objectId {
-    return _id;
-  }
-
-}
-
-
-class VideoDesc extends DBEntity {
-  String videoKey;
-  String channelId;
-  String description;
-  String title;
-
-  String hintTopic;
-  String hintLesson;
-
-  VideoDesc();
-
-  VideoDesc.fromJson(Map<String, dynamic> map) :
-    videoKey = map['videoKey'],
-    channelId = map['channelId'],
-    description = map['description'],
-    title = map['title'],
-        hintTopic = map['hintTopic'],
-        hintLesson = map['hintLesson'],
-
-      super.fromJson(map);
-
-  Map<String, dynamic> toJson() {
-    var map = {
-      '_id' : objectId,
-      'videoKey' :  videoKey,
-      'channelId' :  channelId,
-      'description':  description,
-      'title':  title,
-      'hintTopic': hintTopic,
-      'hintLesson': hintLesson,
-
-    };
-
-    return map;
-  }
-}
-
-
-class ChannelDesc extends DBEntity {
-
-  String channelId;
-  String name;
-
-  ChannelDesc(this.channelId);
-
-  ChannelDesc.fromJson(Map<String, dynamic> map) :
-        channelId = map['channelId'],
-        name = map['name'],
-        super.fromJson(map);
-
-  Map<String, dynamic> toJson() {
-    var map = {
-      '_id' : objectId,
-      'channelId' :  channelId,
-      'name':  name,
-    };
-
-    return map;
-  }
-}
 
 
 enum LessonLevel {
@@ -119,10 +65,78 @@ enum LessonLevel {
 }
 
 
+enum ChannelType {
+  Creator,
+  Curator
+}
+
+enum TopicType {
+  Category,
+  Curation
+}
+
+
+@JsonSerializable()
+class DBEntity {
+
+  @JsonKey(name : '_id')
+  String id;
+
+  DBEntity();
+
+  DBEntity.fromJson(Map<String, dynamic> map) : id = map['_id'];
+
+  String get objectId {
+    return id;
+  }
+
+}
+
+
+@JsonSerializable()
+class VideoDesc extends DBEntity {
+
+  String videoKey;
+  String channelId;
+  String description;
+  String title;
+
+  String hintTopic;
+  String hintLesson;
+  int markTag;
+
+  VideoDesc();
+
+
+  factory VideoDesc.fromJson(Map<String, dynamic> json) => _$VideoDescFromJson(json);
+  Map<String, dynamic> toJson() =>_$VideoDescToJson(this);
+}
+
+
+@JsonSerializable()
+class ChannelDesc extends DBEntity {
+
+  String channelId;
+  String name;
+
+  @JsonKey(defaultValue: ChannelType.Creator)
+  ChannelType channelType;
+
+  ChannelDesc(this.channelId);
+
+  factory ChannelDesc.fromJson(Map<String, dynamic> json) => _$ChannelDescFromJson(json);
+  Map<String, dynamic> toJson() =>_$ChannelDescToJson(this);
+}
+
+
 @JsonSerializable()
 class LessonVideo {
+
   String videoKey;
   String title;
+
+  String duration;
+  String thumnail_url;
 
   LessonVideo();
 
@@ -136,10 +150,14 @@ class LessonDesc extends DBEntity {
   String lessonId;
 
   String mainTopicId;
+  String subTopicId;
+
   String youtuberId;
 
   String title;
   String description;
+  String detailDescription;
+
   Set<String> tags;
 
   LessonLevel level;
@@ -147,7 +165,9 @@ class LessonDesc extends DBEntity {
 
   String imageAssetPath;
 
-  List<String> videoList = List<String>();
+  int publish;
+
+  //List<String> videoList = List<String>();
 
   List<LessonVideo> videoListEx = new List<LessonVideo>();
 
@@ -159,29 +179,22 @@ class LessonDesc extends DBEntity {
 
 }
 
+@JsonSerializable()
 class TopicDesc extends DBEntity {
   String topicId;
   String name;
+
   String section;
 
+  @JsonKey(defaultValue: TopicType.Category)
+  TopicType topicType;
+  String channelId; //Creator or Curator Id
+
   TopicDesc(this.topicId);
+  
 
-  TopicDesc.fromJson(Map<String, dynamic> map) :
-        topicId = map['topicId'],
-        name = map['name'],
-        section = map['section'],
-        super.fromJson(map);
-
-  Map<String, dynamic> toJson() {
-    var map = {
-      '_id' : objectId,
-      'topicId' :  topicId,
-      'name':  name,
-      'section' : section,
-    };
-
-    return map;
-  }
+  factory TopicDesc.fromJson(Map<String, dynamic> json) => _$TopicDescFromJson(json);
+  Map<String, dynamic> toJson() =>_$TopicDescToJson(this);
 }
 
 //const List<String> topics = ['-', 'java','swift','flutter','etc'];

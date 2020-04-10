@@ -63,7 +63,7 @@ class LessonDataManager extends DataManager with ChangeNotifier {
     return lessonList;
   }
 
-  Future<List<KeyValue>> loadLessonListByTopic(String topicId) async {
+  Future<List<KeyName>> loadLessonListByTopic(String topicId) async {
 
     var where = {
       'mainTopicId' : topicId
@@ -71,7 +71,7 @@ class LessonDataManager extends DataManager with ChangeNotifier {
 
     var list = await  loadLessonList(where, null, null);
 
-    return list.map((e) => new KeyValue(e.lessonId, e.title)).toList();
+    return list.map((e) => new KeyName(e.lessonId, e.title)).toList();
   }
 
   Future<bool> insertLesson(LessonDesc desc) async {

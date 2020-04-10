@@ -34,15 +34,37 @@ class ChannelDataManager extends DataManager with ChangeNotifier {
 //    return channelList.firstWhere((element) => element.channelId == channelId);
 //  }
 
-  KeyValue findChannelKeyValue(String channelId) {
+  KeyName findChannelKeyValue(String channelId) {
 
     try {
       var desc = channelList.firstWhere((element) =>
       element.channelId == channelId);
-      return new KeyValue(desc.channelId, desc.name);
+
+      return new KeyName(desc.channelId,(desc.channelType == ChannelType.Curator ? "(큐레이터)" : "") + desc.name);
     } catch (ex) {
-      return new KeyValue(channelId, channelId);
+      return new KeyName(channelId, channelId);
     }
+  }
+
+  List<KeyName> findCuratorKeyValues() {
+
+      var descList = channelList.where((element) => element.channelType == ChannelType.Curator).toList();
+
+      var desc = descList.map((element) =>
+      new KeyName(element.channelId,(element.channelType == ChannelType.Curator ? "(큐레이터)" : "") + element.name)).toList();
+      return desc;
+
+  }
+
+
+
+  List<KeyName> findChannelKeyValues() {
+
+    var desc = channelList.map((element) =>
+    //new KeyName(element.channelId, element.name)).toList();
+    new KeyName(element.channelId,(element.channelType == ChannelType.Curator ? "(큐레이터)" : "") + element.name)).toList();
+
+    return desc;
   }
 
 

@@ -31,16 +31,35 @@ class TopicDataManager extends DataManager with ChangeNotifier {
 //    return channelList.firstWhere((element) => element.channelId == channelId);
 //  }
 
-  KeyValue findTopicKeyValue(String channelId) {
+  KeyName findTopicKeyValue(String channelId) {
 
     try {
       var desc = topicList.firstWhere((element) =>
       element.topicId == channelId);
-      return new KeyValue(desc.topicId, desc.name);
+      return new KeyName(desc.topicId, desc.name);
     }catch(ex) {
-      return new KeyValue(channelId, channelId);
+      return new KeyName(channelId, channelId);
     }
   }
+
+
+  List<KeyName> findTopicKeyValuesAtCategory() {
+    var descList = topicList.where((element) => element.topicType == TopicType.Category).toList();
+
+    var desc = descList.map((element) =>
+     new KeyName(element.topicId, element.name)).toList();
+    return desc;
+  }
+
+
+  List<KeyName> findTopicKeyValuesAtCuration() {
+    var descList = topicList.where((element) => element.topicType == TopicType.Curation).toList();
+
+    var desc = descList.map((element) =>
+    new KeyName(element.topicId, element.name)).toList();
+    return desc;
+  }
+
 
 
   Future<List<TopicDesc>> loadTopicList() async {

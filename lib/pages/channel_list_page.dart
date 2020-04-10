@@ -7,6 +7,7 @@ import 'package:mywebapp/manager/youtube_util.dart';
 import 'package:mywebapp/models/models.dart';
 import 'package:mywebapp/pages/dialog_util.dart';
 import 'package:mywebapp/pages/topic_detail_dialog.dart';
+import 'package:mywebapp/pages/widget_util.dart';
 
 class ChannelListPage extends StatefulWidget {
   @override
@@ -28,7 +29,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return ButtonBar(
       alignment: MainAxisAlignment.start,
       children: <Widget>[
-        FlatButton(child: Text('채널 추가'), onPressed:  showAddChannel)
+        FlatButton(child: Text('채널 추가'), onPressed:  showAddChannel),
+        FlatButton(child: Text('큐레이터 등록'), onPressed:  showAddCurator)
       ],
     );
   }
@@ -40,6 +42,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
       });
     });
   }
+
+
+  void showAddCurator() {
+    DialogUtil.showAddCurator(context, () {
+      setState(() {
+
+      });
+    });
+  }
+
 }
 
 class ChannelDataTable extends StatefulWidget {
@@ -82,6 +94,22 @@ class _ChannelDataTableState extends State<ChannelDataTable> {
     setState(() {});
   }
 
+  void updateChannel(ChannelDesc desc) async {
+    await ChannelDataManager.singleton().updateChannel(desc);
+    setState(() {});
+  }
+  
+  void commandYoutubeChannel(String channelId) async {
+    
+    int videoCount = await GlobalDataManager.singleton().requestYoutubeSearch(channelId);
+    
+    setState(() {
+      
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     var table = DataTable(
@@ -98,6 +126,8 @@ class _ChannelDataTableState extends State<ChannelDataTable> {
           onSort: (int columnIndex, bool ascending) {
             print('column-sort: $columnIndex $ascending');
           },
+        ),
+        const DataColumn(label:  Text('Type'),
         ),
         const DataColumn(
           label: const SizedBox(width: 200, child: Text('Name')),
@@ -132,9 +162,16 @@ class _ChannelDataTableState extends State<ChannelDataTable> {
             DataCell(
               Text(desc.channelId),
             ),
+            DataCell(
+              Text( KeyName.findKeyValue(ChannelTypeKeyNameList, desc.channelType).value)
+//              WidgetUtil.buildListSelector(ChannelTypeKeyNameList, desc.channelType , (newValue) {
+//                desc.channelType = newValue.key;
+//                updateChannel(desc);
+//              }, width: 100)
+            ),
             DataCell(buildEditableText(desc.name, (text) {
               desc.name = text;
-              ChannelDataManager.singleton().updateChannel(desc);
+              updateChannel(desc);
             })),
             DataCell(FutureBuilder(
                 future: VideoDataManager.singleton()
@@ -152,6 +189,12 @@ class _ChannelDataTableState extends State<ChannelDataTable> {
                     child: Text('채널 열기'),
                     onPressed: () {
                       YoutubeUtil.openChannel(desc.channelId);
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('채널 탐색'),
+                    onPressed: () {
+                      commandYoutubeChannel(desc.channelId);
                     },
                   ),
               FlatButton(

@@ -85,6 +85,22 @@ class _LessonListPageState extends State<LessonListPage> {
     loadPage();
   }
 
+  void onFilterChanged(String topic, String subTopic, String channel) {
+    where = {};
+    activePage = 0;
+
+    selectedTopicId = topic;
+
+    if (topic != null && topic != '') where['mainTopicId'] = topic;
+    if (subTopic != null && subTopic != '') where['subTopicId'] = subTopic;
+
+    if (channel != null && channel != '') where['youtuberId'] = channel;
+
+    loadCount();
+    loadPage();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -109,19 +125,6 @@ class _LessonListPageState extends State<LessonListPage> {
         )));
   }
 
-  void onFilterChanged(String topic, String channel) {
-    where = {};
-    activePage = 0;
-
-    selectedTopicId = topic;
-
-    if (topic != null && topic != '') where['mainTopicId'] = topic;
-    if (channel != null && channel != '') where['youtubeId'] = channel;
-
-    loadCount();
-    loadPage();
-  }
-
   Widget _buildPageNavigtor() {
     return Container(
         child: Row(children: [
@@ -136,7 +139,7 @@ class _LessonListPageState extends State<LessonListPage> {
   }
 }
 
-typedef void FilterChanged(String topic, String lesson);
+typedef void FilterChanged(String maintopic,String subtopic, String lesson);
 
 class FilterSelectorWidget extends StatefulWidget {
   final FilterChanged onFilterChanged;
@@ -148,11 +151,13 @@ class FilterSelectorWidget extends StatefulWidget {
 }
 
 class _FilterSelectorState extends State<FilterSelectorWidget> {
-  final List<KeyValue> channelList = [];
-  final List<KeyValue> topicList = [];
+  List<KeyName> channelList = [];
+  List<KeyName> mainTopicList = [];
+  List<KeyName> subTopicList = [];
 
   String channelSelected = '';
-  String topicSelected = '';
+  String mainTopicSelected = '';
+  String subTopicSelected = '';
 
   _FilterSelectorState() {}
 
@@ -164,20 +169,29 @@ class _FilterSelectorState extends State<FilterSelectorWidget> {
   }
 
   Future loadKeyList() async {
-    KeyValue.initList(channelList);
-    KeyValue.initList(topicList);
+   // KeyName.initList(channelList);
+    //KeyName.initList(mainTopicList);
 
-    var list = await VideoDataManager.singleton().getUniqueChannels();
+//    var list = await VideoDataManager.singleton().getUniqueChannels();
+//
+//    for (var id in list) {
+//      var ch = ChannelDataManager.singleton().findChannelKeyValue(id);
+//      channelList.add(ch);
+//    }
+//
+    channelList = ChannelDataManager.singleton().findChannelKeyValues();
 
-    for (var id in list) {
-      var ch = ChannelDataManager.singleton().findChannelKeyValue(id);
-      channelList.add(ch);
-    }
+    mainTopicList = TopicDataManager.singleton().findTopicKeyValuesAtCategory();
+    subTopicList = TopicDataManager.singleton().findTopicKeyValuesAtCuration();
 
-    for (var topic in TopicDataManager.singleton().topicList) {
-      var to = TopicDataManager.singleton().findTopicKeyValue(topic.topicId);
-      topicList.add(to);
-    }
+    mainTopicList.insert(0,new KeyName('', 'none'));
+    subTopicList.insert(0,new KeyName('', 'none'));
+    channelList.insert(0,new KeyName('', 'none'));
+
+//    for (var topic in TopicDataManager.singleton().topicList) {
+//      var to = TopicDataManager.singleton().findTopicKeyValue(topic.topicId);
+//      topicList.add(to);
+//    }
 
     setState(() {});
   }
@@ -191,17 +205,31 @@ class _FilterSelectorState extends State<FilterSelectorWidget> {
         child: Row(
           children: <Widget>[
             new Container(
-        //        color: Colors.cyanAccent,
+              //        color: Colors.cyanAccent,
                 width: 400,
                 child: new Column(
                   children: <Widget>[
-                    Text("Topic"),
-                    WidgetUtil.buildListSelector(topicList, topicSelected,
-                        (KeyValue sel) {
-                      topicSelected = sel.key;
-                      widget.onFilterChanged(topicSelected, channelSelected);
-                      setState(() {});
-                    })
+                    Text("Main Topic"),
+                    WidgetUtil.buildListSelector(mainTopicList, mainTopicSelected,
+                            (KeyName sel) {
+                          mainTopicSelected = sel.key;
+                          widget.onFilterChanged(mainTopicSelected, subTopicSelected, channelSelected);
+                          setState(() {});
+                        })
+                  ],
+                )),
+            new Container(
+              //        color: Colors.cyanAccent,
+                width: 400,
+                child: new Column(
+                  children: <Widget>[
+                    Text("Sub Topic"),
+                    WidgetUtil.buildListSelector(subTopicList, subTopicSelected,
+                            (KeyName sel) {
+                              subTopicSelected = sel.key;
+                          widget.onFilterChanged(mainTopicSelected, subTopicSelected, channelSelected);
+                          setState(() {});
+                        })
                   ],
                 )),
             new Container(
@@ -211,9 +239,9 @@ class _FilterSelectorState extends State<FilterSelectorWidget> {
                   children: <Widget>[
                     Text("Channel"),
                     WidgetUtil.buildListSelector(channelList, channelSelected,
-                        (KeyValue sel) {
+                        (KeyName sel) {
                       channelSelected = sel.key;
-                      widget.onFilterChanged(topicSelected, channelSelected);
+                      widget.onFilterChanged(mainTopicSelected, subTopicSelected, channelSelected);
                       setState(() {});
                     })
                   ],
@@ -234,7 +262,7 @@ class LessonDataTable extends StatefulWidget {
 
 class _LessonDataTableState extends State<LessonDataTable> {
   final List<String> log = <String>[];
-  final List<KeyValue> _topicList = new List<KeyValue>();
+  final List<KeyName> _topicList = new List<KeyName>();
 
   @override
   void initState() {
@@ -250,10 +278,10 @@ class _LessonDataTableState extends State<LessonDataTable> {
 
   Future loadKeyList() async {
     _topicList.clear();
-    _topicList.add(new KeyValue('', '-'));
+    _topicList.add(new KeyName('', '-'));
     _topicList.addAll(TopicDataManager.singleton()
         .topicList
-        .map((e) => new KeyValue(e.topicId, e.name)));
+        .map((e) => new KeyName(e.topicId, e.name)));
   }
 
   Future updateLesson(LessonDesc desc) async {
@@ -261,6 +289,45 @@ class _LessonDataTableState extends State<LessonDataTable> {
     setState(() {
 
     });
+  }
+
+
+  String findChannelName(LessonDesc desc) {
+    if(desc.youtuberId !=null)
+      return ChannelDataManager.singleton().findChannelKeyValue(desc.youtuberId).value;
+    else
+      return '';
+
+  }
+
+  String findTopicName(LessonDesc desc) {
+    if(desc.mainTopicId !=null)
+      return TopicDataManager.singleton().findTopicKeyValue(desc.mainTopicId).value;
+    else
+      return '';
+  }
+
+  String findSubTopicName(LessonDesc desc) {
+    if(desc.subTopicId !=null)
+      return TopicDataManager.singleton().findTopicKeyValue(desc.subTopicId).value;
+    else
+      return '';
+  }
+  String findPublishStage(LessonDesc desc) {
+    desc.publish = desc.publish ?? 0;
+    if(desc.publish == 0)
+        return 'Draft';
+    else if(desc.publish ==1)
+        return 'Review';
+    else //if(desc.publish  > 1)
+      return 'Publish';
+  }
+
+  void onSelectLesson(LessonDesc desc) {
+
+    Navigator.of(context).push(new CupertinoPageRoute(
+        builder: (context) => new LessonDetailPage(desc),
+        fullscreenDialog: false));
   }
 
   @override
@@ -281,19 +348,32 @@ class _LessonDataTableState extends State<LessonDataTable> {
         const DataColumn(
           label: Text('LessonId'),
         ),
+        const DataColumn(
+          label: Text('Publish'),
+        ),
         DataColumn(
-          label: const SizedBox(width: 100, child: Text('Topic')),
+          label: const SizedBox(child: Text('MainTopic')),
           onSort: (int columnIndex, bool ascending) {
-            print('column-sort: $columnIndex $ascending');
+           // print('column-sort: $columnIndex $ascending');
+          },
+        ),
+        DataColumn(
+          label: const SizedBox(child: Text('SubTopic')),
+          onSort: (int columnIndex, bool ascending) {
+            // print('column-sort: $columnIndex $ascending');
+          },
+        ),
+        DataColumn(
+          label: const SizedBox( child: Text('Channel')),
+          onSort: (int columnIndex, bool ascending) {
+            // print('column-sort: $columnIndex $ascending');
           },
         ),
         const DataColumn(
-          label: const SizedBox(width: 200, child: Text('Title')),
+          label: const SizedBox(child: Text('Title')),
         ),
 
-        const DataColumn(
-          label: Text('Description'),
-        ),
+
         const DataColumn(
           label: Text('난이도'),
         ),
@@ -314,16 +394,30 @@ class _LessonDataTableState extends State<LessonDataTable> {
           onSelectChanged: (bool selected) {
             print('row-selected: ${desc.lessonId}');
 
-            Navigator.of(context).push(new CupertinoPageRoute(
-                builder: (context) => new LessonDetailPage(desc),
-                fullscreenDialog: false));
+            onSelectLesson(desc);
+
           },
           cells: <DataCell>[
             DataCell(
               Text(desc.lessonId),
             ),
+
             DataCell(
-              Text(desc.mainTopicId),
+              Text(WidgetUtil.findPublishStage(desc.publish))
+//
+//              WidgetUtil.buildPublisSelector(desc.publish, (newValue) {
+//                desc.publish=newValue;
+//                updateLesson(desc);
+//              })
+            ),
+            DataCell(
+              Text(findTopicName(desc)),
+            ),
+            DataCell(
+              Text(findSubTopicName(desc)),
+            ),
+            DataCell(
+              Text(findChannelName(desc)),
             ),
             DataCell(
               WidgetUtil.buildEditableText(desc.title, (text) {
@@ -332,16 +426,16 @@ class _LessonDataTableState extends State<LessonDataTable> {
               }),
               showEditIcon: true,
             ),
-            DataCell(
-              WidgetUtil.buildEditableText(desc.description, (text) {
-                desc.description = text;
-                updateLesson(desc);
-              }),
-              // showEditIcon: true,
-              onTap: () {
-                //log.add('cell-tap: ${dessert.calories}');
-              },
-            ),
+//            DataCell(
+//              WidgetUtil.buildEditableText(desc.description, (text) {
+//                desc.description = text;
+//                updateLesson(desc);
+//              }),
+//              // showEditIcon: true,
+//              onTap: () {
+//                //log.add('cell-tap: ${dessert.calories}');
+//              },
+//            ),
             DataCell(
               WidgetUtil.buildLevelEnumSelector(desc.level ?? LessonLevel.Beginnger, (newValue) {
                 desc.level = newValue;

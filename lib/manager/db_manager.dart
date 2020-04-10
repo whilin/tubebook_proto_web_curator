@@ -11,7 +11,7 @@ import '../models/models.dart';
 
 
 
-class GlobalDataManager {
+class GlobalDataManager extends DataManager {
 
   static GlobalDataManager _singleton = GlobalDataManager._internal();
 
@@ -26,5 +26,28 @@ class GlobalDataManager {
   Future loadInitializedData() async {
     await ChannelDataManager.singleton().loadChannelList();
     await TopicDataManager.singleton().loadTopicList();
+  }
+
+
+  Future<int> requestYoutubeSearch(String channelId) async {
+
+    Map<String, dynamic> reqPacket = {
+      'channelId' : channelId
+    };
+
+    try {
+      Map<String, dynamic> resPacket = await super.proxy.requestNet(
+          'youtube/channelSearch', reqPacket);
+
+      int resultCode =  resPacket['resultCode'] as int;
+      int videoCount =  resPacket['videoCount'] as int;
+
+      return videoCount;
+
+    } catch(ex) {
+      print(ex);
+
+      return -1;
+    }
   }
 }

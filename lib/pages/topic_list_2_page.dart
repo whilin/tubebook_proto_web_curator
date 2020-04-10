@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mywebapp/manager/ChannelDataManager.dart';
 import 'package:mywebapp/manager/LessonDataManager.dart';
 import 'package:mywebapp/manager/TopicDataManager.dart';
 import 'package:mywebapp/manager/db_manager.dart';
@@ -34,8 +35,11 @@ class _TopicList2PageState extends State<TopicList2Page> {
     return ButtonBar(
       alignment: MainAxisAlignment.start,
       children: <Widget>[
-        FlatButton(child: Text('토픽 추가'), onPressed: (){
+        FlatButton(child: Text('카테고리 토픽 추가'), onPressed: (){
           DialogUtil.showAddTopic(context, refresh);
+        }),
+        FlatButton(child: Text('큐레이이터 토픽 추가'), onPressed: (){
+          DialogUtil.showAddCuratorTopic(context, refresh);
         })
       ],
     );
@@ -106,6 +110,12 @@ class _TopicDataTableState extends State<TopicDataTable> {
           },
         ),
         const DataColumn(
+          label: Text('TopicType'),
+        ),
+        const DataColumn(
+          label: Text('Curator'),
+        ),
+        const DataColumn(
           label: const SizedBox(width: 200, child: Text('Title')),
         ),
 
@@ -127,6 +137,10 @@ class _TopicDataTableState extends State<TopicDataTable> {
       rows: _topicList.map<DataRow>((TopicDesc desc) {
         //var ch = DBManager.singleton().findChannelKeyValue(desc.channelId);
 
+        KeyName curator =null;
+       if(desc.topicType == TopicType.Curation)
+         curator = ChannelDataManager.singleton().findChannelKeyValue(desc.channelId);
+
         return DataRow(
           key: Key(desc.topicId),
 //
@@ -141,6 +155,13 @@ class _TopicDataTableState extends State<TopicDataTable> {
             DataCell(
               Text(desc.topicId),
             ),
+            DataCell(
+              Text( KeyName.findKeyValue(TopicTypeKeyNameList, desc.topicType).value)
+            ),
+            DataCell(
+                curator != null ? Text(curator.value) : Text('')
+            ),
+
             DataCell(
                 WidgetUtil.buildEditableText(desc.name, (text) {
                   desc.name = text;

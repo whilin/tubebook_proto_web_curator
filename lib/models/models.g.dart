@@ -7,57 +7,53 @@ part of 'models.dart';
 // **************************************************************************
 
 DBEntity _$DBEntityFromJson(Map<String, dynamic> json) {
-  return DBEntity();
+  return DBEntity()..id = json['_id'] as String;
 }
 
-Map<String, dynamic> _$DBEntityToJson(DBEntity instance) => <String, dynamic>{};
-
-LessonVideo _$LessonVideoFromJson(Map<String, dynamic> json) {
-  return LessonVideo()
-    ..videoKey = json['videoKey'] as String
-    ..title = json['title'] as String;
-}
-
-Map<String, dynamic> _$LessonVideoToJson(LessonVideo instance) =>
-    <String, dynamic>{
-      'videoKey': instance.videoKey,
-      'title': instance.title,
+Map<String, dynamic> _$DBEntityToJson(DBEntity instance) => <String, dynamic>{
+      '_id': instance.id,
     };
 
-LessonDesc _$LessonDescFromJson(Map<String, dynamic> json) {
-  return LessonDesc(
-    json['lessonId'] as String,
-  )
-    .._id = json['_id'] as String
-    ..mainTopicId = json['mainTopicId'] as String
-    ..youtuberId = json['youtuberId'] as String
-    ..title = json['title'] as String
+VideoDesc _$VideoDescFromJson(Map<String, dynamic> json) {
+  return VideoDesc()
+    ..id = json['_id'] as String
+    ..videoKey = json['videoKey'] as String
+    ..channelId = json['channelId'] as String
     ..description = json['description'] as String
-    ..tags = (json['tags'] as List)?.map((e) => e as String)?.toSet()
-    ..level = _$enumDecodeNullable(_$LessonLevelEnumMap, json['level'])
-    ..recommanded = json['recommanded'] as int
-    ..imageAssetPath = json['imageAssetPath'] as String
-    ..videoList = (json['videoList'] as List)?.map((e) => e as String)?.toList()
-    ..videoListEx = (json['videoListEx'] as List)
-        ?.map((e) =>
-            e == null ? null : LessonVideo.fromJson(e as Map<String, dynamic>))
-        ?.toList();
+    ..title = json['title'] as String
+    ..hintTopic = json['hintTopic'] as String
+    ..hintLesson = json['hintLesson'] as String
+    ..markTag = json['markTag'] as int;
 }
 
-Map<String, dynamic> _$LessonDescToJson(LessonDesc instance) =>
-    <String, dynamic>{
-      '_id' : instance._id,
-      'lessonId': instance.lessonId,
-      'mainTopicId': instance.mainTopicId,
-      'youtuberId': instance.youtuberId,
-      'title': instance.title,
+Map<String, dynamic> _$VideoDescToJson(VideoDesc instance) => <String, dynamic>{
+      '_id': instance.id,
+      'videoKey': instance.videoKey,
+      'channelId': instance.channelId,
       'description': instance.description,
-      'tags': instance.tags?.toList(),
-      'level': _$LessonLevelEnumMap[instance.level],
-      'recommanded': instance.recommanded,
-      'imageAssetPath': instance.imageAssetPath,
-      'videoList': instance.videoList,
-      'videoListEx': instance.videoListEx,
+      'title': instance.title,
+      'hintTopic': instance.hintTopic,
+      'hintLesson': instance.hintLesson,
+      'markTag': instance.markTag,
+    };
+
+ChannelDesc _$ChannelDescFromJson(Map<String, dynamic> json) {
+  return ChannelDesc(
+    json['channelId'] as String,
+  )
+    ..id = json['_id'] as String
+    ..name = json['name'] as String
+    ..channelType =
+        _$enumDecodeNullable(_$ChannelTypeEnumMap, json['channelType']) ??
+            ChannelType.Creator;
+}
+
+Map<String, dynamic> _$ChannelDescToJson(ChannelDesc instance) =>
+    <String, dynamic>{
+      '_id': instance.id,
+      'channelId': instance.channelId,
+      'name': instance.name,
+      'channelType': _$ChannelTypeEnumMap[instance.channelType],
     };
 
 T _$enumDecode<T>(
@@ -92,8 +88,91 @@ T _$enumDecodeNullable<T>(
   return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
 }
 
+const _$ChannelTypeEnumMap = {
+  ChannelType.Creator: 'Creator',
+  ChannelType.Curator: 'Curator',
+};
+
+LessonVideo _$LessonVideoFromJson(Map<String, dynamic> json) {
+  return LessonVideo()
+    ..videoKey = json['videoKey'] as String
+    ..title = json['title'] as String;
+}
+
+Map<String, dynamic> _$LessonVideoToJson(LessonVideo instance) =>
+    <String, dynamic>{
+      'videoKey': instance.videoKey,
+      'title': instance.title,
+    };
+
+LessonDesc _$LessonDescFromJson(Map<String, dynamic> json) {
+  return LessonDesc(
+    json['lessonId'] as String,
+  )
+    ..id = json['_id'] as String
+    ..mainTopicId = json['mainTopicId'] as String
+    ..subTopicId = json['subTopicId'] as String
+    ..youtuberId = json['youtuberId'] as String
+    ..title = json['title'] as String
+    ..description = json['description'] as String
+    ..detailDescription = json['detailDescription'] as String
+    ..tags = (json['tags'] as List)?.map((e) => e as String)?.toSet()
+    ..level = _$enumDecodeNullable(_$LessonLevelEnumMap, json['level'])
+    ..recommanded = json['recommanded'] as int
+    ..imageAssetPath = json['imageAssetPath'] as String
+    ..publish = json['publish'] as int
+    ..videoListEx = (json['videoListEx'] as List)
+        ?.map((e) =>
+            e == null ? null : LessonVideo.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$LessonDescToJson(LessonDesc instance) =>
+    <String, dynamic>{
+      '_id': instance.id,
+      'lessonId': instance.lessonId,
+      'mainTopicId': instance.mainTopicId,
+      'subTopicId': instance.subTopicId,
+      'youtuberId': instance.youtuberId,
+      'title': instance.title,
+      'description': instance.description,
+      'detailDescription': instance.detailDescription,
+      'tags': instance.tags?.toList(),
+      'level': _$LessonLevelEnumMap[instance.level],
+      'recommanded': instance.recommanded,
+      'imageAssetPath': instance.imageAssetPath,
+      'publish': instance.publish,
+      'videoListEx': instance.videoListEx,
+    };
+
 const _$LessonLevelEnumMap = {
   LessonLevel.Beginnger: 'Beginnger',
   LessonLevel.Intermediate: 'Intermediate',
   LessonLevel.Advanced: 'Advanced',
+};
+
+TopicDesc _$TopicDescFromJson(Map<String, dynamic> json) {
+  return TopicDesc(
+    json['topicId'] as String,
+  )
+    ..id = json['_id'] as String
+    ..name = json['name'] as String
+    ..section = json['section'] as String
+    ..topicType = _$enumDecodeNullable(_$TopicTypeEnumMap, json['topicType']) ??
+        TopicType.Category
+    ..channelId = json['channelId'] as String;
+}
+
+Map<String, dynamic> _$TopicDescToJson(TopicDesc instance) => <String, dynamic>{
+      '_id': instance.id,
+      'topicId': instance.topicId,
+      'name': instance.name,
+      'section': instance.section,
+      'topicType': _$TopicTypeEnumMap[instance.topicType],
+      'channelId': instance.channelId,
+    };
+
+const _$TopicTypeEnumMap = {
+  TopicType.Category: 'Category',
+  TopicType.Curation: 'Curation',
 };
