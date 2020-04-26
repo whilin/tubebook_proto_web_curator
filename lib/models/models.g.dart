@@ -45,7 +45,11 @@ ChannelDesc _$ChannelDescFromJson(Map<String, dynamic> json) {
     ..name = json['name'] as String
     ..channelType =
         _$enumDecodeNullable(_$ChannelTypeEnumMap, json['channelType']) ??
-            ChannelType.Creator;
+            ChannelType.Creator
+    ..yt_thumnail_default_url = json['yt_thumnail_default_url'] as String
+    ..yt_thumnail_medium_url = json['yt_thumnail_medium_url'] as String
+    ..yt_thumnail_high_url = json['yt_thumnail_high_url'] as String
+    ..yt_publishedAt = json['yt_publishedAt'] as String;
 }
 
 Map<String, dynamic> _$ChannelDescToJson(ChannelDesc instance) =>
@@ -54,6 +58,10 @@ Map<String, dynamic> _$ChannelDescToJson(ChannelDesc instance) =>
       'channelId': instance.channelId,
       'name': instance.name,
       'channelType': _$ChannelTypeEnumMap[instance.channelType],
+      'yt_thumnail_default_url': instance.yt_thumnail_default_url,
+      'yt_thumnail_medium_url': instance.yt_thumnail_medium_url,
+      'yt_thumnail_high_url': instance.yt_thumnail_high_url,
+      'yt_publishedAt': instance.yt_publishedAt,
     };
 
 T _$enumDecode<T>(
@@ -96,13 +104,31 @@ const _$ChannelTypeEnumMap = {
 LessonVideo _$LessonVideoFromJson(Map<String, dynamic> json) {
   return LessonVideo()
     ..videoKey = json['videoKey'] as String
-    ..title = json['title'] as String;
+    ..title = json['title'] as String
+    ..yt_title = json['yt_title'] as String
+    ..yt_duration = json['yt_duration'] as String
+    ..yt_thumnail_default_url = json['yt_thumnail_default_url'] as String
+    ..yt_thumnail_medium_url = json['yt_thumnail_medium_url'] as String
+    ..yt_thumnail_high_url = json['yt_thumnail_high_url'] as String
+    ..yt_publishedAt = json['yt_publishedAt'] as String
+    ..durationH = json['durationH'] as int
+    ..durationM = json['durationM'] as int
+    ..durationS = json['durationS'] as int;
 }
 
 Map<String, dynamic> _$LessonVideoToJson(LessonVideo instance) =>
     <String, dynamic>{
       'videoKey': instance.videoKey,
       'title': instance.title,
+      'yt_title': instance.yt_title,
+      'yt_duration': instance.yt_duration,
+      'yt_thumnail_default_url': instance.yt_thumnail_default_url,
+      'yt_thumnail_medium_url': instance.yt_thumnail_medium_url,
+      'yt_thumnail_high_url': instance.yt_thumnail_high_url,
+      'yt_publishedAt': instance.yt_publishedAt,
+      'durationH': instance.durationH,
+      'durationM': instance.durationM,
+      'durationS': instance.durationS,
     };
 
 LessonDesc _$LessonDescFromJson(Map<String, dynamic> json) {

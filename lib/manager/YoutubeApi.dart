@@ -99,9 +99,9 @@ class YoutubeVideoData {
 
     switch(level)
     {
-      case 1 : return thumbnail['medium'];
-      case 2 : return thumbnail['high'];
-      default: return thumbnail['default'];
+      case 1 : return thumbnail['medium']['url'];
+      case 2 : return thumbnail['high']['url'];
+      default: return thumbnail['default']['url'];
     }
 
   }

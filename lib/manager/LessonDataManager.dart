@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mywebapp/manager/YoutubeApi.dart';
 
 import 'db_manager.dart';
 import 'db_proxy.dart';
@@ -150,5 +151,30 @@ class LessonDataManager extends DataManager with ChangeNotifier {
     print("countLesson response: $count");
 
     return count;
+  }
+
+  Future<bool> loadVideoInfoFromYoutube(LessonVideo video) async {
+
+    var data= await YoutubeApi.singleton().getVieoInfo(video.videoKey);
+    if(data !=null) {
+
+      video.yt_thumnail_default_url = data.getThumnail(level: 0);
+      video.yt_thumnail_medium_url  = data.getThumnail(level: 1);
+      video.yt_thumnail_high_url    = data.getThumnail(level: 2);
+
+      video.yt_title = data.title;
+      video.yt_publishedAt = data.publishedAt;
+      video.yt_duration = data.duration;
+      video.durationH = data.durationH;
+      video.durationM = data.durationM;
+      video.durationS = data.durationS;
+
+      if(video.title == null || video.title == '')
+        video.title = video.yt_title;
+
+      return true;
+    } else {
+      return false;
+    }
   }
 }

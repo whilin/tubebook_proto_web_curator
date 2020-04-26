@@ -30,6 +30,7 @@ enum _VideoCommand {
 
 class _LessonDetailPageState extends State<LessonDetailPage> {
   List<KeyName> channelKeys = new List<KeyName>();
+  bool dirty = false;
 
   @override
   void initState() {
@@ -77,9 +78,16 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     setState(() {});
   }
 
+  void setDirty() {
+    dirty = true;
+    setState(() {});
+  }
+
   void commitLesson() async {
     await LessonDataManager.singleton().updateLesson(widget.desc);
+    dirty = false;
     setState(() {});
+
   }
 
   void onDeleteLesson() async {
@@ -121,12 +129,17 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
           }
         }
         break;
+      case _VideoCommand.Edited:
+        {
+
+        }
+        break;
       default:
         break;
     }
 
-    commitLesson();
-
+    dirty = true;
+    //commitLesson();
     setState(() {});
   }
 
@@ -157,6 +170,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
               Container(
                 height: 50,
               ),
+              _buildSaveCommand(),
               Text('비디오 리스트'),
               _buildVideoCommand(),
               _buildVideoList(),
@@ -186,14 +200,14 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             edit:
                 WidgetUtil.buildPublisSelector(widget.desc.publish, (newValue) {
               widget.desc.publish = newValue;
-              commitLesson();
+              setDirty();
             })),
         NameValueWidget(name: '토픽 (카테고리)',
             edit: //Text(widget.desc.mainTopicId)
             WidgetUtil.buildListSelector(
                 catTopicKeyValues, widget.desc.mainTopicId, (newText) {
               widget.desc.mainTopicId = newText.key;
-              commitLesson();
+              setDirty();
             })
         ),
         NameValueWidget(name: '토픽 (큐레이션)',
@@ -201,7 +215,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                 WidgetUtil.buildListSelector(
                     curTopicKeyValues, widget.desc.subTopicId, (newText) {
                 widget.desc.subTopicId = newText.key;
-                commitLesson();
+                setDirty();
                 })
         ),
         NameValueWidget(
@@ -209,7 +223,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             edit: WidgetUtil.buildListSelector(
                 channelKeys, widget.desc.youtuberId, (newText) {
               widget.desc.youtuberId = newText.key;
-              commitLesson();
+              setDirty();
             })),
         NameValueWidget(name: '레슨 아이디', edit: Text(widget.desc.lessonId)),
         NameValueWidget(
@@ -217,14 +231,14 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             edit:
                 WidgetUtil.buildEditableLongText(widget.desc.title, (newText) {
               widget.desc.title = newText;
-              commitLesson();
+              setDirty();
             })),
         NameValueWidget(
             name: '레슨 난이도',
             edit:
                 WidgetUtil.buildLevelEnumSelector(widget.desc.level, (newText) {
               widget.desc.level = newText;
-              commitLesson();
+              setDirty();
             })),
         NameValueWidget(
             name: '추천',
@@ -232,7 +246,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                 widget.desc.recommanded.toString(), (newText) {
               try {
                 widget.desc.recommanded = int.parse(newText);
-                commitLesson();
+                setDirty();
               } catch (ex) {}
             })),
         NameValueWidget(
@@ -241,7 +255,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             edit: WidgetUtil.buildEditableLongText(widget.desc.description,
                 (newText) {
               widget.desc.description = newText;
-              commitLesson();
+              setDirty();
             })),
         NameValueWidget(
             name: '레슨 상세 설명',
@@ -249,7 +263,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             edit: WidgetUtil.buildEditableLongText(widget.desc.detailDescription,
                     (newText) {
                   widget.desc.detailDescription = newText;
-                  commitLesson();
+                  setDirty();
                 })),
       ],
     );
@@ -269,6 +283,23 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             ),
           ],
         ));
+  }
+
+  Widget _buildSaveCommand() {
+    if(dirty)
+      return Container(
+        color: Colors.black12,
+        height: 40,
+        width: 600,
+        child: FlatButton(
+              child: Text('수정 사항 저장하기'),
+              onPressed: (){
+                commitLesson();
+              },
+            )
+        );
+    else
+      return Container();
   }
 
   Widget _buildVideoCommand() {
@@ -323,23 +354,29 @@ class VideoItemEditor extends StatefulWidget {
 }
 
 class _VideoItemEditorState extends State<VideoItemEditor> {
-  VideoDesc originVideo;
-  YoutubeVideoData youtubeData;
+
+  //VideoDesc originVideo;
+ // YoutubeVideoData youtubeData;
+
+  //bool dirty;
 
   void initState() {
     super.initState();
 
-    loadOriginVideo();
+    //loadOriginVideo();
+    refreshOriginVideo();
   }
 
   @override
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (originVideo != null && (widget.video.videoKey != originVideo.videoKey))
-      loadOriginVideo();
+   // if (originVideo != null && (widget.video.videoKey != originVideo.videoKey))
+    //  loadOriginVideo();
+    refreshOriginVideo();
   }
 
+/*
   Future loadOriginVideo() async {
     widget.video.title = widget.video.title ?? '';
     widget.video.videoKey = widget.video.videoKey ?? '';
@@ -365,6 +402,18 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
 
     setState(() {});
   }
+*/
+
+  Future refreshOriginVideo({bool force = false}) async {
+    if(force || (widget.video.yt_duration ==null || widget.video.yt_duration =='')) {
+
+      bool result = await LessonDataManager.singleton().loadVideoInfoFromYoutube(widget.video);
+      if(result) {
+        //updateLesson();
+        setDirty();
+      }
+    }
+  }
 
 
   @override
@@ -372,9 +421,7 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
     return _buildVideoItem(widget.video);
   }
 
-  Future updateLesson() async {
-    await LessonDataManager.singleton().updateLesson(widget.lesson);
-  }
+
 
   void showVideoListPage() async {
     final result = await Navigator.of(context).push(new CupertinoPageRoute(
@@ -383,15 +430,43 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
 
     if (result != null && result != '') {
       widget.video.videoKey = result.toString();
-      loadOriginVideo();
+      refreshOriginVideo();
     }
   }
 
+//  Future updateLesson() async {
+//   // await LessonDataManager.singleton().updateLesson(widget.lesson);
+//    widget.onCommand(widget.video, _VideoCommand.Edited);
+//  }
+
+  void setDirty() {
+    //dirty = true;
+    widget.onCommand(widget.video, _VideoCommand.Edited);
+  }
+
+  /*
   String getVideoInfo() {
     if(youtubeData ==null)
         return '';
 
     return "${youtubeData.duration} : ${youtubeData.title}";
+
+  }
+  */
+
+  String getVideoInfo() {
+
+    if( widget.video.yt_duration !=null && widget.video.yt_duration !='') {
+
+      return "${widget.video.yt_duration}\n${widget.video.yt_title}\n${widget.video.yt_thumnail_default_url}";
+
+    } else {
+      return 'Not Set';
+    }
+//
+//    if(youtubeData ==null)
+//      return '';
+//    return "${youtubeData.duration} : ${youtubeData.title}";
 
   }
 
@@ -408,22 +483,20 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
               h: 0.6,
               edit: WidgetUtil.buildEditableText(video.videoKey, (newValue) {
                 widget.video.videoKey = newValue;
-                updateLesson();
-                loadOriginVideo();
+                //setDirty();
+                refreshOriginVideo();
               })),
           NameValueWidget(
               name: '강의 명칭',
               h: 0.6,
               edit: WidgetUtil.buildEditableText(video.title, (newValue) {
                 widget.video.title = newValue;
-                updateLesson();
+                setDirty();
               })),
           NameValueWidget(
               name: '오리지널 비디오 정보',
               h: 2,
-              edit: youtubeData != null
-                  ? SelectableText(getVideoInfo())
-                  : Text('Not Found')),
+              edit: SelectableText(getVideoInfo())),
           _buildVideoEdit()
         ]);
   }
@@ -440,7 +513,7 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
               icon: Icon(Icons.search),
               onPressed: () {
                 //showVideoListPage();
-                loadOriginVideo();
+                refreshOriginVideo();
               },
             ),
             IconButton(
@@ -448,7 +521,7 @@ class _VideoItemEditorState extends State<VideoItemEditor> {
               icon: Icon(Icons.refresh),
               onPressed: () {
                 //showVideoListPage();
-                refreshOriginVideo();
+                refreshOriginVideo(force: true);
               },
             ),
             IconButton(

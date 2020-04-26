@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:mywebapp/manager/YoutubeApi.dart';
 import 'VideoDataManager.dart';
 import 'db_manager.dart';
 import 'db_proxy.dart';
@@ -124,5 +125,21 @@ class ChannelDataManager extends DataManager with ChangeNotifier {
     await loadChannelList();
 
     return true;
+  }
+
+  Future<bool> loadChannelInfoFromYoutube(ChannelDesc desc) async {
+
+    YoutubeChannelData data = await YoutubeApi.singleton().getChannelInfo(desc.channelId);
+
+    if(data !=null) {
+       desc.yt_publishedAt = data.publishedAt;
+       desc.yt_thumnail_default_url = data.getThumnail(level: 0);
+       desc.yt_thumnail_medium_url = data.getThumnail(level: 1);
+       desc.yt_thumnail_high_url = data.getThumnail(level: 2);
+
+       return true;
+    } else {
+      return false;
+    }
   }
 }

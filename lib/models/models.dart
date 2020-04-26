@@ -118,9 +118,13 @@ class ChannelDesc extends DBEntity {
 
   String channelId;
   String name;
-
   @JsonKey(defaultValue: ChannelType.Creator)
   ChannelType channelType;
+
+  String yt_thumnail_default_url;
+  String yt_thumnail_medium_url;
+  String yt_thumnail_high_url;
+  String yt_publishedAt;
 
   ChannelDesc(this.channelId);
 
@@ -135,8 +139,16 @@ class LessonVideo {
   String videoKey;
   String title;
 
-  String duration;
-  String thumnail_url;
+  String yt_title;
+  String yt_duration;
+  String yt_thumnail_default_url;
+  String yt_thumnail_medium_url;
+  String yt_thumnail_high_url;
+  String yt_publishedAt;
+
+  int durationH;
+  int durationM;
+  int durationS;
 
   LessonVideo();
 
